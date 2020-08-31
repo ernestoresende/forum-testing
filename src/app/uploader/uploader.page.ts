@@ -12,4 +12,9 @@ export class UploaderPage implements OnInit {
   ngOnInit() {
   }
 
+  fileChanged(event) {
+    const files = event.target.files
+    console.log(files)
+  }
+
 }
