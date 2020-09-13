@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { AngularFireAuth } from '@angular/fire/auth'
 import { auth } from 'firebase/app'
 
+import { AngularFirestore } from '@angular/fire/firestore'
+
 import { AlertController } from '@ionic/angular'
+import { UserService } from '../user.service'
 
 @Component({
   selector: 'app-register',
@@ -18,11 +21,23 @@ export class RegisterPage implements OnInit {
 
   constructor(
     public authFire: AngularFireAuth,
+    public storeFire: AngularFirestore,
+    public user: UserService,
     public alertCtrl: AlertController,
     public router: Router,
   ) { }
 
   ngOnInit() {
+  }
+
+  async presentAlert(title: string, content: string) {
+    const alert = await this.alertCtrl.create({
+      header: title,
+      message: content,
+      buttons: ['OK']
+    })
+
+    await alert.present()
   }
 
   async register() {
@@ -36,6 +51,20 @@ export class RegisterPage implements OnInit {
       const res = await this.authFire.createUserWithEmailAndPassword(
         username + '@codedamn.com', password
       )
+
+      this.storeFire.doc(`users/${res.user.uid}`).set({
+        username
+
+      })
+
+      this.user.setUser({
+        username,
+        uid: res.user.uid
+      }) 
+
+      this.presentAlert('Sucess', 'You are registered!')
+      this.router.navigate(['/tabs'])
+
       console.log(res)
       this.showAlert("Sucess!", "Welcome aboard!")
       this.router.navigate(['/tabs'])
